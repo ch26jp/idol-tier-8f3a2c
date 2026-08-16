@@ -82,7 +82,7 @@
     line-height: 1.1; letter-spacing: -.02em; font-weight: 800;
     text-wrap: balance;
   }
-  .lede { margin: 0; max-width: 60ch; color: var(--ink-2); font-size: 15px; }
+  .lede { margin: 0; max-width: 44em; color: var(--ink-2); font-size: 15px; line-height: 1.85; }
 
   .stats {
     display: flex; flex-wrap: wrap; gap: 8px 28px;
@@ -94,6 +94,31 @@
     font-variant-numeric: tabular-nums;
   }
   .stat span { font-size: 12px; color: var(--muted); }
+
+  /* 帯の構成を積み上げバーで見せる。数字だけでは「上に行くほど狭い」形が伝わらない */
+  .dist { display: flex; gap: 3px; margin-top: 22px; height: 44px; }
+  .dist a {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    min-width: 10px; border-radius: 6px; text-decoration: none;
+    background: color-mix(in srgb, var(--dc) 20%, transparent);
+    border: 1px solid color-mix(in srgb, var(--dc) 45%, transparent);
+    color: var(--dc); font-weight: 800; font-size: 12.5px; letter-spacing: .02em;
+    transition: background .16s, transform .16s;
+    overflow: hidden;
+  }
+  .dist a:hover { background: color-mix(in srgb, var(--dc) 34%, transparent); transform: translateY(-2px); }
+  .dist a i { font-style: normal; opacity: .72; font-size: 11px; margin-left: 5px; font-weight: 700; }
+  /* 幅の狭い帯はラベルだけを小さく出す（消してしまうと何の帯か分からなくなる） */
+  .dist a.tiny { font-size: 11px; letter-spacing: -.02em; padding: 0 2px; }
+
+  /* チップに帯の色を差す。一覧にリズムが出る */
+  .chip::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--tc); flex: none; opacity: .8;
+  }
+  .chip:hover { background: color-mix(in srgb, var(--tc) 7%, var(--chip)); }
+  .chip[aria-expanded="true"] { background: color-mix(in srgb, var(--tc) 11%, var(--chip)); }
+
 
   /* ---------- controls ---------- */
   .controls {
@@ -275,7 +300,8 @@
     text-transform: uppercase; color: var(--muted); font-weight: 700;
   }
   .legend ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
-  .legend li { display: grid; grid-template-columns: 24px 1fr; gap: 10px; align-items: baseline; }
+  .legend li { display: grid; grid-template-columns: 3.6em 1fr; gap: 10px; align-items: baseline; }
+  .legend .m { white-space: nowrap; }
   .legend .m { color: var(--ss); font-weight: 800; }
   .legend p { margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; }
 
@@ -302,6 +328,11 @@
     .tierdef b { font-size: 14px; }
     .tierdef span { font-size: 12.5px; line-height: 1.5; }
 
+    /* 狭い画面では分布バーの件数を省き、帯の記号だけにする */
+    .dist { height: 36px; gap: 2px; }
+    .dist a { font-size: 11px; padding: 0 1px; }
+    .dist a i { display: none; }
+
     /* フェス履歴のラベル列を細くして本文の幅を稼ぐ */
     .detail .fest p { grid-template-columns: 1fr; gap: 1px; margin-bottom: 7px; }
     .detail .fest b { min-width: 0; }
@@ -327,6 +358,7 @@
       E〜G帯は「単独公演やフェス出演の実績を確認できなかった」という消極的な理由での分類のため、
       同じ基準で並べると誤解を招くと考え、この表からは外しています。
     </p>
+    <div class="dist" id="dist" aria-label="帯ごとの掲載数"></div>
     <div class="stats" id="stats"></div>
   </header>
 
@@ -403,6 +435,14 @@ const statsEl = document.getElementById("stats");
 const jumpEl  = document.getElementById("jump");
 const tiersEl = document.getElementById("tiers");
 const qEl     = document.getElementById("q");
+
+// 帯構成の積み上げバー。幅は組数に比例し、押すとその帯へ飛ぶ
+document.getElementById("dist").innerHTML = TIERS.map(t => {
+  const n = DATA.filter(g => g.t === t.k).length;
+  const tiny = n / DATA.length < 0.05;
+  return `<a href="#tier-${t.k}" style="--dc:${t.c}; flex:${n}" title="${t.k}帯 ${n}組"
+    class="${tiny ? "tiny" : ""}">${tiny ? t.k : `${t.k}<i>${n}</i>`}</a>`;
+}).join("");
 
 statsEl.innerHTML = `<div class="stat"><b>${DATA.length}</b><span>掲載グループ</span></div>` +
   TIERS.map(t => `<div class="stat"><b style="color:${t.c}">${DATA.filter(g => g.t === t.k).length}</b><span>${t.k}帯</span></div>`).join("");
