@@ -219,12 +219,10 @@
   .legend .more[open] > summary { border-bottom: 1px solid var(--line); margin-bottom: 10px; }
 
   /* 判定根拠パネル：結論だけでなく根拠そのものを開示する */
-  .detail .badge {
-    display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 999px;
-    font-size: 10.5px; font-weight: 700; letter-spacing: .06em; vertical-align: middle;
-    border: 1px solid var(--line); color: var(--muted);
+  .detail .cf {
+    margin: 10px 0 0; font-size: 11.5px; color: var(--muted); letter-spacing: .02em;
   }
-  .detail .badge.high { color: var(--tc); border-color: var(--tc); }
+  .detail .cf b { color: var(--ink-2); font-weight: 700; }
   .detail .reason { margin: 8px 0 0; }
   .detail .floor {
     margin: 8px 0 0; padding: 7px 11px; border-radius: 6px;
@@ -337,13 +335,16 @@
     <div class="tierdef" id="tierdef"></div>
     <ul>
       <li><span class="m">◆</span><span>声優・2次元IP発のユニット</span></li>
-      <li><span class="m">▲</span><span>アイドルというカテゴリを離れた活動形態</span></li>
+      <li><span class="m">▲</span><span>アイドル以外の音楽ジャンルの文脈でも紹介されるグループ</span></li>
       <li><span class="m">●</span><span>K-POP系のグローバルグループ（日本を主活動地とする）</span></li>
-      <li><span class="m">確度</span><span>判定の根拠がどれだけ固いかの目安。グループの評価ではありません。
-        「高」は会場・チャートなど一次情報で裏が取れているもの、「低」は主にフェス出演歴からの推定です</span></li>
+      <li><span class="m">確度</span><span>判定の材料がどれだけ固いかの目安。グループの評価ではありません</span></li>
     </ul>
     <details class="more">
     <summary>判定ルールの詳細</summary>
+    <p>
+      各グループの判定欄の末尾にある「根拠の確度」は、こちらの判定材料がどれだけ固いかの目安です。
+      「高」は会場・チャートなど一次情報で裏が取れているもの、「低」は主にフェス出演歴からの推定です。
+    </p>
     <p>
       <strong>グループ名を押すと、判定の根拠・出典・フェス出演履歴が開きます。</strong>
       <b>TIF</b>はTOKYO IDOL FESTIVAL、<b>@JAM EXPO</b>はいずれも国内最大級のアイドルフェスです。
@@ -391,7 +392,7 @@ const TIERS = [
   { k: "D",  c: "var(--d)",  d: "大型ライブハウスの単独、または主要フェス出演1〜2年" }
 ];
 const FM = { voice_actor_ip: "◆", beyond_idol: "▲", global_group: "●" };
-const FML = { voice_actor_ip: "声優・2次元IP発", beyond_idol: "アイドルの枠を離れた活動", global_group: "K-POP系グローバル" };
+const FML = { voice_actor_ip: "声優・2次元IP発", beyond_idol: "アイドル以外の音楽ジャンルの文脈でも紹介される", global_group: "K-POP系グローバル" };
 
 document.getElementById("n-total").textContent = DATA.length;
 
@@ -517,18 +518,20 @@ function toggle(btn) {
     ).join(" ／ ")]);
   }
 
-  const CF = { high: "確度 高", medium: "確度 中", low: "確度 低" };
+  const CF = { high: "高", medium: "中", low: "低" };
 
   el.innerHTML = `<button class="close" type="button" aria-label="閉じる">×</button>` +
     `<strong>${esc(g.n)}</strong>` +
-    (g.cf ? `<span class="badge ${g.cf === "high" ? "high" : ""}">${CF[g.cf] || g.cf}</span>` : "") +
     `<p class="reason">${esc(g.r)}</p>` +
     (g.fl ? `<p class="floor">${esc(g.fl)}</p>` : "") +
     (g.lg ? `<p class="legacy">${esc(g.lg)}</p>` : "") +
     (rows.length ? `<dl>${rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join("")}</dl>` : "") +
     (fest.length ? `<div class="fest">${fest.map(f => `<p><b>${f[0]}</b><span>${f[1]}</span></p>`).join("")}</div>` : "") +
     (g.su ? `<div class="src"><b>出典</b>${g.su.map(u =>
-      `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(srcName(u))}</a>`).join("")}</div>` : "");
+      `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(srcName(u))}</a>`).join("")}</div>` : "") +
+    // 確度は「判定の根拠がどれだけ固いか」であってグループの評価ではないため、
+    // 名前の隣ではなくパネル下部に置き、主語を明示する
+    (g.cf ? `<p class="cf">この判定の根拠の確度：<b>${CF[g.cf] || g.cf}</b></p>` : "");
   // --tc は .tier 側で定義されているため、body直下に置く場合は明示的に渡す
   const tier = TIERS.find(x => x.k === tk);
   if (tier) el.style.setProperty("--tc", tier.c);
