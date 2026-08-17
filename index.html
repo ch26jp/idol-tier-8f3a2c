@@ -13,7 +13,7 @@
     color-scheme: light dark;
     --ss: #C4185F; --s: #9E2D82; --a: #6E3C9C;
     --b: #47509E; --c: #356088; --d: #4E6675;
-    --ground: #FAF8FB;
+    --ground: #F7F4FA;
     --surface: #FFFFFF;
     --surface-2: #F2EFF5;
     --ink: #1B1622;
@@ -95,29 +95,42 @@
   }
   .stat span { font-size: 12px; color: var(--muted); }
 
+  /* 日本語の折り返し。auto-phraseは文節の切れ目で改行する（Chrome/Edgeが対応、他は従来どおり）。
+     text-wrap: pretty で最終行に1語だけ残るのを防ぐ */
+  .lede, .legend p, .tierdef span, .legend li span,
+  .detail .reason, .detail .legacy, .detail .floor, .rail .crit {
+    word-break: auto-phrase;
+    line-break: strict;
+    text-wrap: pretty;
+  }
+  .grad {
+    background: linear-gradient(100deg, var(--ss), var(--a) 45%, var(--c) 78%, var(--d));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
   /* 帯の構成を積み上げバーで見せる。数字だけでは「上に行くほど狭い」形が伝わらない */
-  .dist { display: flex; gap: 3px; margin-top: 22px; height: 44px; }
+  .dist { display: flex; gap: 4px; margin-top: 26px; height: 62px; }
   .dist a {
-    position: relative; display: flex; align-items: center; justify-content: center;
-    min-width: 10px; border-radius: 6px; text-decoration: none;
-    background: color-mix(in srgb, var(--dc) 20%, transparent);
-    border: 1px solid color-mix(in srgb, var(--dc) 45%, transparent);
-    color: var(--dc); font-weight: 800; font-size: 12.5px; letter-spacing: .02em;
-    transition: background .16s, transform .16s;
+    position: relative; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 1px;
+    min-width: 12px; border-radius: 8px; text-decoration: none;
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--dc) 92%, transparent),
+      color-mix(in srgb, var(--dc) 68%, transparent));
+    color: #fff; font-weight: 900; font-size: 15px; letter-spacing: .01em;
+    box-shadow: 0 1px 2px rgba(0,0,0,.10);
+    transition: transform .16s cubic-bezier(.2,.7,.3,1), box-shadow .16s, filter .16s;
     overflow: hidden;
   }
-  .dist a:hover { background: color-mix(in srgb, var(--dc) 34%, transparent); transform: translateY(-2px); }
-  .dist a i { font-style: normal; opacity: .72; font-size: 11px; margin-left: 5px; font-weight: 700; }
+  .dist a:hover { transform: translateY(-3px); filter: saturate(1.15); box-shadow: 0 6px 16px rgba(0,0,0,.16); }
+  .dist a i {
+    font-style: normal; font-size: 10.5px; font-weight: 700;
+    opacity: .92; letter-spacing: .02em; font-variant-numeric: tabular-nums;
+  }
   /* 幅の狭い帯はラベルだけを小さく出す（消してしまうと何の帯か分からなくなる） */
-  .dist a.tiny { font-size: 11px; letter-spacing: -.02em; padding: 0 2px; }
+  .dist a.tiny { font-size: 12px; letter-spacing: -.03em; padding: 0 1px; }
 
   /* チップに帯の色を差す。一覧にリズムが出る */
-  .chip::before {
-    content: ""; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--tc); flex: none; opacity: .8;
-  }
-  .chip:hover { background: color-mix(in srgb, var(--tc) 7%, var(--chip)); }
-  .chip[aria-expanded="true"] { background: color-mix(in srgb, var(--tc) 11%, var(--chip)); }
 
 
   /* ---------- controls ---------- */
@@ -165,9 +178,13 @@
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     font-size: clamp(52px, 8vw, 76px); font-weight: 900;
     line-height: .84; letter-spacing: -.05em;
-    color: var(--tc);
+    background: linear-gradient(160deg, var(--tc), color-mix(in srgb, var(--tc) 62%, transparent));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
     display: block; margin-bottom: 12px;
   }
+  /* 帯の区切りに色を差す */
+  .tier { border-bottom-color: color-mix(in srgb, var(--tc) 22%, var(--line)); }
+  .rail .count { color: var(--tc); opacity: .85; }
   .rail .count {
     font-size: 12px; color: var(--muted); font-weight: 700;
     letter-spacing: .06em; font-variant-numeric: tabular-nums;
@@ -329,8 +346,8 @@
     .tierdef span { font-size: 12.5px; line-height: 1.5; }
 
     /* 狭い画面では分布バーの件数を省き、帯の記号だけにする */
-    .dist { height: 36px; gap: 2px; }
-    .dist a { font-size: 11px; padding: 0 1px; }
+    .dist { height: 48px; gap: 3px; }
+    .dist a { font-size: 12.5px; padding: 0 1px; }
     .dist a i { display: none; }
 
     /* フェス履歴のラベル列を細くして本文の幅を稼ぐ */
@@ -344,19 +361,31 @@
     html { scroll-behavior: auto; }
   }
   html { scroll-behavior: smooth; }
+  .chip {
+    background: color-mix(in srgb, var(--tc) 7%, var(--chip));
+    border-color: color-mix(in srgb, var(--tc) 26%, var(--line-strong));
+  }
+  .chip::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--tc); flex: none;
+  }
+  .chip:hover {
+    background: color-mix(in srgb, var(--tc) 15%, var(--chip));
+    border-color: var(--tc);
+  }
+  .chip[aria-expanded="true"] {
+    background: color-mix(in srgb, var(--tc) 20%, var(--chip));
+    border-color: var(--tc);
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <p class="eyebrow">現役限定・2026年8月時点</p>
-    <h1>女性アイドルグループ<br>Tier表 SS→D</h1>
+    <h1>女性アイドルグループ<br>Tier表 <span class="grad">SS→D</span></h1>
     <p class="lede">
-      TOKYO IDOL FESTIVAL（TIF）・@JAM EXPOの出演実績、単独公演の会場規模、
-      チャート順位とYouTube登録者数をもとに、<b id="n-total">—</b>組を9段階のうちSS〜Dに分類しています。
-      解散・活動休止のグループと、現役かどうか確認できなかったグループは載せていません。
-      E〜G帯は「単独公演やフェス出演の実績を確認できなかった」という消極的な理由での分類のため、
-      同じ基準で並べると誤解を招くと考え、この表からは外しています。
+      TOKYO IDOL FESTIVAL（TIF）・@JAM EXPOの出演実績、単独公演の会場規模、チャート順位とYouTube登録者数をもとに、<b id="n-total">—</b>組を9段階のうちSS〜Dに分類しています。解散・活動休止のグループと、現役かどうか確認できなかったグループは載せていません。E〜G帯は「単独公演やフェス出演の実績を確認できなかった」という消極的な理由での分類のため、同じ基準で並べると誤解を招くと考え、この表からは外しています。
     </p>
     <div class="dist" id="dist" aria-label="帯ごとの掲載数"></div>
     <div class="stats" id="stats"></div>
@@ -374,30 +403,19 @@
     <details class="more">
     <summary>判定ルールの詳細</summary>
     <p>
-      各グループの判定欄の末尾にある「根拠の確度」は、こちらの判定材料がどれだけ固いかの目安です。
-      「高」は会場・チャートなど一次情報で裏が取れているもの、「低」は主にフェス出演歴からの推定です。
+      各グループの判定欄の末尾にある「根拠の確度」は、こちらの判定材料がどれだけ固いかの目安です。「高」は会場・チャートなど一次情報で裏が取れているもの、「低」は主にフェス出演歴からの推定です。
     </p>
     <p>
       <strong>グループ名を押すと、判定の根拠・出典・フェス出演履歴が開きます。</strong>
       <b>TIF</b>はTOKYO IDOL FESTIVAL、<b>@JAM EXPO</b>はいずれも国内最大級のアイドルフェスです。
-      <b>メイン級ステージ</b>は格に応じて重みを変えて数えています。
-      TIFの野外メインステージ<b>HOT STAGE</b>（約5,000人規模）は出演1年を1.0、
-      これに次ぐ<b>HEAT GARAGE</b>（Zepp DiverCity Tokyo）は0.5、
-      @JAM EXPOの<b>ストロベリーステージ</b>は0.4として合計します。
+      <b>メイン級ステージ</b>は格に応じて重みを変えて数えています。TIFの野外メインステージ<b>HOT STAGE</b>（約5,000人規模）は出演1年を1.0、これに次ぐ<b>HEAT GARAGE</b>（Zepp DiverCity Tokyo）は0.5、@JAM EXPOの<b>ストロベリーステージ</b>は0.4として合計します。
     </p>
     <p>
-      単独公演は「有料・自主単独名義・記念行事でない・開催済み」のものだけを算入します
-      （告知だけの未開催公演は原則不算入。ただしチケット完売が確認できる場合は算入）。
-      大きな会場での実績は<b>直近3年以内のものを重く見ます</b>。それより前の公演は、現在どこまで到達しているかを示す材料としては割り引いて扱います。
-      会場の規模だけに寄らないよう、チャート順位とYouTube登録者数が一定以上なら下限の帯を保証する
+      単独公演は「有料・自主単独名義・記念行事でない・開催済み」のものだけを算入します（告知だけの未開催公演は原則不算入。ただしチケット完売が確認できる場合は算入）。大きな会場での実績は<b>直近3年以内のものを重く見ます</b>。それより前の公演は、現在どこまで到達しているかを示す材料としては割り引いて扱います。会場の規模だけに寄らないよう、チャート順位とYouTube登録者数が一定以上なら下限の帯を保証する
       <b>下限保証</b>も併用しています。
     </p>
     <p>
-      判定文にある<b>「複数視点のレビュー」</b>は、会場規模・知名度・動員・継続性など複数の観点から
-      機械的に検討したうえで、疑わしいものを個別に調べ直した手順を指します。
-      掲載分は2026年8月に全数を再検証し、活動終了・出典の誤り・実績の取り違えを洗い出しました。
-      それでも根拠の強さには差があるため、各グループに確度を付けています。
-      判断が割れうる箇所は根拠と出典をそのまま載せてあるので、納得できなければ出典を辿って確かめてください。
+      判定文にある<b>「複数視点のレビュー」</b>は、会場規模・知名度・動員・継続性など複数の観点から機械的に検討したうえで、疑わしいものを個別に調べ直した手順を指します。掲載分は2026年8月に全数を再検証し、活動終了・出典の誤り・実績の取り違えを洗い出しました。それでも根拠の強さには差があるため、各グループに確度を付けています。判断が割れうる箇所は根拠と出典をそのまま載せてあるので、納得できなければ出典を辿って確かめてください。
     </p>
     <p>
       なお<b>この表に無いことは、活動していないことを意味しません。</b>
